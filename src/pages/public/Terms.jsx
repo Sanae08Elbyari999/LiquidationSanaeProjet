@@ -12,7 +12,7 @@ const Terms = () => {
                             Conditions Générales d'Utilisation
                         </h1>
                         <p className="text-gray-600">
-                            Dernière mise à jour : 15 janvier 2024
+                            Dernière mise à jour : 15 janvier 2026
                         </p>
                     </div>
 

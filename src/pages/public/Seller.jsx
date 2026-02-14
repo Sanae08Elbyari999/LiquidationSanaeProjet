@@ -2,7 +2,7 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import UserProfile from '../../components/shared/UserProfile';
-import VideoCard from '../../components/shared/VideoCard';
+import VideoCard from '../../components/video/VideoCard';
 
 const Seller = () => {
     const { id } = useParams();
