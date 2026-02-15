@@ -1,8 +1,10 @@
+// src/pages/public/Wishlist.jsx
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { FaHeart, FaShoppingCart, FaTrash, FaEye, FaShareAlt } from 'react-icons/fa';
+import { Link, useNavigate } from 'react-router-dom';
+import { FaHeart, FaShoppingCart, FaTrash, FaEye } from 'react-icons/fa';
 
 const Wishlist = () => {
+    const navigate = useNavigate();
     const [favorites, setFavorites] = useState([
         {
             id: 2,
@@ -32,12 +34,95 @@ const Wishlist = () => {
 
     const removeFromWishlist = (id) => {
         setFavorites(favorites.filter(item => item.id !== id));
+        // Notification discrète
+        const toast = document.createElement('div');
+        toast.className = 'fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-fade-in-out';
+        toast.textContent = 'Produit retiré des favoris';
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    };
+
+    const handleAddToCart = (item) => {
+        // Récupérer le panier existant
+        const existingCart = JSON.parse(localStorage.getItem('cart') || '[]');
+        
+        // Vérifier si le produit existe déjà
+        const existingItem = existingCart.find(i => i.id === item.id);
+        
+        if (existingItem) {
+            existingItem.quantity += 1;
+        } else {
+            existingCart.push({
+                id: item.id,
+                name: item.title,
+                price: item.price,
+                quantity: 1,
+                image: item.image,
+                stock: item.stock
+            });
+        }
+        
+        // Sauvegarder dans localStorage
+        localStorage.setItem('cart', JSON.stringify(existingCart));
+        
+        // Notification de succès
+        const toast = document.createElement('div');
+        toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-fade-in-out';
+        toast.textContent = `${item.title} a été ajouté au panier`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+
+        // Rediriger vers le panier après un court délai
+        setTimeout(() => {
+            navigate('/cart');
+        }, 1500);
+    };
+
+    const handleAddAllToCart = () => {
+        if (favorites.length === 0) return;
+        
+        // Récupérer le panier existant
+        const existingCart = JSON.parse(localStorage.getItem('cart') || '[]');
+        
+        // Ajouter tous les favoris
+        favorites.forEach(item => {
+            const existingItem = existingCart.find(i => i.id === item.id);
+            
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                existingCart.push({
+                    id: item.id,
+                    name: item.title,
+                    price: item.price,
+                    quantity: 1,
+                    image: item.image,
+                    stock: item.stock
+                });
+            }
+        });
+        
+        // Sauvegarder dans localStorage
+        localStorage.setItem('cart', JSON.stringify(existingCart));
+        
+        // Notification de succès
+        const toast = document.createElement('div');
+        toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-fade-in-out';
+        toast.textContent = `${favorites.length} produit(s) ajouté(s) au panier`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+        
+        // Rediriger vers le panier après un délai
+        setTimeout(() => {
+            navigate('/cart');
+        }, 1500);
     };
 
     return (
         <div className="min-h-screen bg-gray-50 py-8">
             <div className="container mx-auto px-4">
                 <div className="mb-8">
+                    <h1 className="text-2xl font-bold text-gray-900 mb-2">Mes favoris</h1>
                     <p className="text-gray-600">
                         {favorites.length} produit{favorites.length > 1 ? 's' : ''} sauvegardé{favorites.length > 1 ? 's' : ''}
                     </p>
@@ -63,7 +148,7 @@ const Wishlist = () => {
                             {favorites.map((item) => (
                                 <div key={item.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
                                     <div className="flex flex-col sm:flex-row gap-4">
-                                        <div className="relative">
+                                        <div className="relative flex-shrink-0">
                                             <img
                                                 src={item.image}
                                                 alt={item.title}
@@ -97,6 +182,7 @@ const Wishlist = () => {
                                                 <button
                                                     onClick={() => removeFromWishlist(item.id)}
                                                     className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                                                    title="Retirer des favoris"
                                                 >
                                                     <FaTrash />
                                                 </button>
@@ -112,7 +198,10 @@ const Wishlist = () => {
                                                     )}
                                                 </div>
                                                 <div className="flex gap-2">
-                                                    <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
+                                                    <button 
+                                                        onClick={() => handleAddToCart(item)}
+                                                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                                                    >
                                                         <FaShoppingCart />
                                                         Ajouter au panier
                                                     </button>
@@ -144,14 +233,19 @@ const Wishlist = () => {
                                         <span>{favorites.filter(f => f.stock === 'En stock').length}</span>
                                     </div>
                                     <div className="pt-3 border-t">
-                                        <button className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
+                                        <button 
+                                            onClick={handleAddAllToCart}
+                                            className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                                        >
                                             <FaShoppingCart />
                                             Ajouter tout au panier
                                         </button>
                                     </div>
                                 </div>
                                 <div className="text-sm text-gray-500">
-                                    <p className="mb-2">Ajouté le plus récent: {new Date(Math.max(...favorites.map(f => new Date(f.addedDate)))).toLocaleDateString('fr-FR')}</p>
+                                    <p className="mb-2">
+                                        <span className="font-medium">Ajouté le plus récent:</span> {new Date(Math.max(...favorites.map(f => new Date(f.addedDate)))).toLocaleDateString('fr-FR')}
+                                    </p>
                                     <p>Les produits peuvent changer de prix ou devenir indisponibles</p>
                                 </div>
                             </div>
@@ -159,6 +253,19 @@ const Wishlist = () => {
                     </div>
                 )}
             </div>
+
+            {/* Styles pour les animations des notifications */}
+            <style jsx>{`
+                @keyframes fadeInOut {
+                    0% { opacity: 0; transform: translateY(-20px); }
+                    10% { opacity: 1; transform: translateY(0); }
+                    90% { opacity: 1; transform: translateY(0); }
+                    100% { opacity: 0; transform: translateY(-20px); }
+                }
+                .animate-fade-in-out {
+                    animation: fadeInOut 3s ease-in-out forwards;
+                }
+            `}</style>
         </div>
     );
 };

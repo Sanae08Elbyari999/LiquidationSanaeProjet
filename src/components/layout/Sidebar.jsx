@@ -13,11 +13,12 @@ import {
     FaCouch,
     FaCar,
     FaUtensils,
-    FaBookmark,
     FaPlus,
     FaChevronDown,
     FaChevronRight,
-    FaInfoCircle
+    FaInfoCircle,
+    FaHeart,
+    FaShoppingCart
 } from 'react-icons/fa';
 import { useState, useEffect } from 'react';
 
@@ -82,11 +83,13 @@ const Sidebar = ({ onClose }) => {
         ? [
             { name: 'Ma chaîne', path: '/profile/channel', icon: <FaVideo className="text-lg" /> },
             { name: 'Ajouter un produit', path: '/profile/add-product', icon: <FaPlus className="text-lg" />, highlight: true },
-            { name: 'Mes produits', path: '/mes-produits', icon: <FaBookmark className="text-lg" /> },
+            { name: 'Mes favoris', path: '/wishlist', icon: <FaHeart className="text-lg" /> },
+            { name: 'Mon panier', path: '/cart', icon: <FaShoppingCart className="text-lg" /> },
             { name: 'Mes achats', path: '/profile/orders', icon: <FaShoppingBag className="text-lg" /> },
         ]
         : [
-            { name: 'Mes produits', path: '/mes-produits', icon: <FaBookmark className="text-lg" /> },
+            { name: 'Mes favoris', path: '/wishlist', icon: <FaHeart className="text-lg" /> },
+            { name: 'Mon panier', path: '/cart', icon: <FaShoppingCart className="text-lg" /> },
             { name: 'Mes achats', path: '/profile/orders', icon: <FaShoppingBag className="text-lg" /> },
         ];
 
@@ -210,15 +213,7 @@ const Sidebar = ({ onClose }) => {
 
                 {/* Bouton de déconnexion compact */}
                 <div className="px-2 mt-6">
-                    <button 
-                    onClick={() => {
-                        localStorage.removeItem('channelCreated');
-                        localStorage.removeItem('user');
-                        localStorage.removeItem('token');
-                        window.location.href = '/';
-                    }}
-                    className="flex items-center space-x-3 p-2 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors w-full text-sm"
-                    >
+                    <button className="flex items-center space-x-3 p-2 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors w-full text-sm">
                         <FaSignOutAlt className="flex-shrink-0" />
                         <span className="font-medium">Déconnexion</span>
                     </button>

@@ -1,12 +1,14 @@
+// src/pages/public/Cart.jsx
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; // Ajoutez useNavigate ici
 import { FaTrash, FaPlus, FaMinus, FaShoppingCart, FaArrowLeft, FaLock } from 'react-icons/fa';
 
 const Cart = () => {
+    const navigate = useNavigate(); // Ajoutez cette ligne
     const [cartItems, setCartItems] = useState([
         {
             id: 1,
-            name: "Sumsung  galaxy 256GB",
+            name: "Sumsung galaxy 256GB",
             price: 4500,
             quantity: 1,
             image: "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=400",
@@ -33,6 +35,14 @@ const Cart = () => {
 
     const removeItem = (id) => {
         setCartItems(cartItems.filter(item => item.id !== id));
+    };
+
+    const handleCheckout = () => {
+        // Vérifier si le panier n'est pas vide
+        if (cartItems.length > 0) {
+            // Naviguer vers la page de paiement
+            navigate('/checkout');
+        }
     };
 
     const subtotal = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
@@ -163,7 +173,10 @@ const Cart = () => {
                                     </div>
                                 </div>
 
-                                <button className="w-full py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-3 text-lg font-semibold mb-4">
+                                <button 
+                                    onClick={handleCheckout}
+                                    className="w-full py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-3 text-lg font-semibold mb-4"
+                                >
                                     <FaLock />
                                     Procéder au paiement
                                 </button>

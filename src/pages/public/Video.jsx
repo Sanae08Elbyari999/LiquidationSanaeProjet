@@ -1,6 +1,6 @@
 // src/pages/public/Video.jsx
 import React, { useState, useRef, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import Button from '../../components/ui/Button';
 
 import {
@@ -25,12 +25,17 @@ import {
 } from 'react-icons/fa';
 
 const Video = () => {
+    const navigate = useNavigate();
     const { id } = useParams();
     const [isPlaying, setIsPlaying] = useState(true);
     const [isMuted, setIsMuted] = useState(true);
     const [isLiked, setIsLiked] = useState(false);
     const [isSaved, setIsSaved] = useState(false);
     const [showFullDescription, setShowFullDescription] = useState(false);
+    const [userRating, setUserRating] = useState(0);
+    const [hoverRating, setHoverRating] = useState(0);
+    const [averageRating, setAverageRating] = useState(4.7);
+    const [totalRatings, setTotalRatings] = useState(124);
     const videoRef = useRef(null);
 
     // Initialiser la vidéo avec son désactivé
@@ -39,8 +44,10 @@ const Video = () => {
             videoRef.current.muted = true;
             videoRef.current.play().catch(e => {
                 console.log("Autoplay avec son désactivé a échoué:", e);
-                videoRef.current.muted = true;
-                videoRef.current.play().catch(console.error);
+                if (videoRef.current) {
+                    videoRef.current.muted = true;
+                    videoRef.current.play().catch(err => console.error("Second échec:", err));
+                }
             });
         }
     }, []);
@@ -50,7 +57,7 @@ const Video = () => {
             if (isPlaying) {
                 videoRef.current.pause();
             } else {
-                videoRef.current.play();
+                videoRef.current.play().catch(e => console.log("Playback error:", e));
             }
             setIsPlaying(!isPlaying);
         }
@@ -61,6 +68,55 @@ const Video = () => {
             videoRef.current.muted = !videoRef.current.muted;
             setIsMuted(!isMuted);
         }
+    };
+
+    const handleAddToCart = () => {
+        const existingCart = JSON.parse(localStorage.getItem('cart') || '[]');
+        
+        const existingItem = existingCart.find(item => item.id === videoData.id);
+        
+        if (existingItem) {
+            existingItem.quantity += 1;
+        } else {
+            existingCart.push({
+                id: videoData.id,
+                name: videoData.title,
+                price: videoData.price,
+                quantity: 1,
+                image: "https://images.unsplash.com/photo-1632661674596-df8be070a6c5?w=400",
+                stock: "En stock"
+            });
+        }
+        
+        localStorage.setItem('cart', JSON.stringify(existingCart));
+        
+        const toast = document.createElement('div');
+        toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-fade-in-out';
+        toast.textContent = 'Produit ajouté au panier !';
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+        
+        setTimeout(() => {
+            navigate('/cart');
+        }, 1500);
+    };
+
+    const handleRating = (rating) => {
+        setUserRating(rating);
+        
+        // Simuler le calcul de la nouvelle moyenne
+        const newTotalRatings = totalRatings + 1;
+        const newAverage = ((averageRating * totalRatings) + rating) / newTotalRatings;
+        
+        setAverageRating(Math.round(newAverage * 10) / 10);
+        setTotalRatings(newTotalRatings);
+        
+        // Notification
+        const toast = document.createElement('div');
+        toast.className = 'fixed top-4 right-4 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-fade-in-out';
+        toast.textContent = `Merci pour votre note de ${rating} étoile${rating > 1 ? 's' : ''} !`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
     };
 
     // Données mockées pour la vidéo
@@ -225,13 +281,62 @@ const Video = () => {
                                         </span>
                                     </div>
                                     <h1 className="text-2xl font-bold text-gray-900 mb-3">{videoData.title}</h1>
-                                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                                    
+                                    {/* Section notation avec étoiles interactives */}
+                                    <div className="flex items-center gap-4 mb-2">
                                         <div className="flex items-center gap-1">
-                                            <FaStar className="text-yellow-400" />
-                                            <span>{videoData.likes} avis</span>
+                                            {/* Étoiles pour la note moyenne */}
+                                            <div className="flex">
+                                                {[1, 2, 3, 4, 5].map((star) => (
+                                                    <FaStar
+                                                        key={star}
+                                                        className={`${
+                                                            star <= Math.round(averageRating)
+                                                                ? 'text-yellow-400'
+                                                                : 'text-gray-300'
+                                                        } text-sm`}
+                                                    />
+                                                ))}
+                                            </div>
+                                            <span className="text-sm font-medium text-gray-700 ml-1">
+                                                {averageRating.toFixed(1)}
+                                            </span>
+                                            <span className="text-xs text-gray-500">
+                                                ({totalRatings} avis)
+                                            </span>
                                         </div>
                                     </div>
+
+                                    {/* Étoiles pour la notation utilisateur */}
+                                    <div className="flex items-center gap-2 mt-2">
+                                        <span className="text-xs text-gray-500">Noter ce produit :</span>
+                                        <div className="flex gap-1">
+                                            {[1, 2, 3, 4, 5].map((star) => (
+                                                <button
+                                                    key={star}
+                                                    onMouseEnter={() => setHoverRating(star)}
+                                                    onMouseLeave={() => setHoverRating(0)}
+                                                    onClick={() => handleRating(star)}
+                                                    className="focus:outline-none transition-transform hover:scale-110"
+                                                >
+                                                    <FaStar
+                                                        className={`${
+                                                            star <= (hoverRating || userRating)
+                                                                ? 'text-yellow-400'
+                                                                : 'text-gray-300'
+                                                        } text-lg cursor-pointer`}
+                                                    />
+                                                </button>
+                                            ))}
+                                        </div>
+                                        {userRating > 0 && (
+                                            <span className="text-xs text-green-600 font-medium">
+                                                Vous avez noté {userRating}/5
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
+                                
                                 <div className="flex gap-2">
                                     <button
                                         onClick={handleLike}
@@ -248,49 +353,49 @@ const Video = () => {
                                 </div>
                             </div>
 
-{/* Prix */}
-<div className="mb-6 p-5 bg-white rounded-xl border border-blue-100">
-    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        <div>
-            <div className="flex items-center gap-2 mb-3">
-                <span className="text-3xl font-bold text-gray-900">{videoData.price.toLocaleString()} DH</span>
-                {videoData.originalPrice && (
-                    <span className="text-sm text-gray-400 line-through">{videoData.originalPrice.toLocaleString()} DH</span>
-                )}
-                {videoData.discount && (
-                    <span className="px-1.5 py-0.5 bg-red-100 text-red-600 text-xs font-medium rounded">
-                        -{videoData.discount}%
-                    </span>
-                )}
-            </div>
-            
-            <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500">
-                <div className="flex items-center gap-1">
-                    <FaMapMarkerAlt className="text-gray-400" />
-                    <span>{videoData.location}</span>
-                </div>
-                <span className="text-gray-300">•</span>
-                <div className="flex items-center gap-1">
-                    <FaTruck className="text-gray-400" />
-                    <span>{videoData.deliveryFee} DH livraison</span>
-                </div>
-                <span className="text-gray-300">•</span>
-                <div className="flex items-center gap-1">
-                    <FaShieldAlt className="text-gray-400" />
-                    <span>Garantie {videoData.warranty}</span>
-                </div>
-            </div>
-        </div>
-        
-        <div className="flex items-center gap-2 lg:flex-col lg:items-end">
-            <div className="flex items-center gap-1.5">
-                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                <span className="text-sm font-medium text-gray-700">En stock</span>
-            </div>
-            <span className="text-xs text-gray-400">Livraison sous 24h</span>
-        </div>
-    </div>
-</div>
+                            {/* Prix */}
+                            <div className="mb-6 p-5 bg-white rounded-xl border border-blue-100">
+                                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                                    <div>
+                                        <div className="flex items-center gap-2 mb-3">
+                                            <span className="text-3xl font-bold text-gray-900">{videoData.price.toLocaleString()} DH</span>
+                                            {videoData.originalPrice && (
+                                                <span className="text-sm text-gray-400 line-through">{videoData.originalPrice.toLocaleString()} DH</span>
+                                            )}
+                                            {videoData.discount && (
+                                                <span className="px-1.5 py-0.5 bg-red-100 text-red-600 text-xs font-medium rounded">
+                                                    -{videoData.discount}%
+                                                </span>
+                                            )}
+                                        </div>
+                                        
+                                        <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500">
+                                            <div className="flex items-center gap-1">
+                                                <FaMapMarkerAlt className="text-gray-400" />
+                                                <span>{videoData.location}</span>
+                                            </div>
+                                            <span className="text-gray-300">•</span>
+                                            <div className="flex items-center gap-1">
+                                                <FaTruck className="text-gray-400" />
+                                                <span>{videoData.deliveryFee} DH livraison</span>
+                                            </div>
+                                            <span className="text-gray-300">•</span>
+                                            <div className="flex items-center gap-1">
+                                                <FaShieldAlt className="text-gray-400" />
+                                                <span>Garantie {videoData.warranty}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex items-center gap-2 lg:flex-col lg:items-end">
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                                            <span className="text-sm font-medium text-gray-700">En stock</span>
+                                        </div>
+                                        <span className="text-xs text-gray-400">Livraison sous 24h</span>
+                                    </div>
+                                </div>
+                            </div>
 
                             {/* Description */}
                             <div className="mb-6">
@@ -327,7 +432,12 @@ const Video = () => {
 
                         {/* Actions */}
                         <div className="bg-white rounded-xl p-6 border border-gray-200">
-                            <Button variant="primary" size="lg" className="w-full py-3 rounded-lg mb-4">
+                            <Button 
+                                variant="primary" 
+                                size="lg" 
+                                className="w-full py-3 rounded-lg mb-4"
+                                onClick={handleAddToCart}
+                            >
                                 <span className="flex items-center justify-center gap-2">
                                     <FaShoppingCart />
                                     Acheter maintenant
@@ -396,7 +506,7 @@ const Video = () => {
                             </div>
                         </div>
 
-                      {/* Sécurité */}
+                        {/* Sécurité */}
                         <div className="bg-blue-50/30 rounded-xl p-5 border border-blue-100">
                             <div className="flex items-start gap-3">
                                 <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -422,7 +532,7 @@ const Video = () => {
                             </div>
                         </div>
 
-                         {/* Garantie */}
+                        {/* Garantie */}
                         <div className="bg-blue-50/30 rounded-xl p-5 border border-blue-100">
                             <div className="flex items-start gap-3">
                                 <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -450,6 +560,19 @@ const Video = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Styles pour les animations */}
+            <style jsx>{`
+                @keyframes fadeInOut {
+                    0% { opacity: 0; transform: translateY(-20px); }
+                    10% { opacity: 1; transform: translateY(0); }
+                    90% { opacity: 1; transform: translateY(0); }
+                    100% { opacity: 0; transform: translateY(-20px); }
+                }
+                .animate-fade-in-out {
+                    animation: fadeInOut 3s ease-in-out forwards;
+                }
+            `}</style>
         </div>
     );
 };

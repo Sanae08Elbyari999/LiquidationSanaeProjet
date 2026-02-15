@@ -24,6 +24,11 @@ import AddProduct from './pages/user/AddProduct';
 import HelpPage from './pages/public/HelpPage';
 import HelpIndex from './pages/public/HelpIndex';
 import Settings from './pages/user/Settings';
+import Checkout from './pages/public/Checkout';
+import OrderConfirmation from './pages/public/OrderConfirmation';
+import ForgotPassword from './pages/public/ForgotPassword';
+import ResetPassword from './pages/public/ResetPassword';
+
 
 import './App.css';
 
@@ -54,6 +59,10 @@ function App() {
                     <Route path="/help/:section" element={<HelpPage />} />
                     <Route path="/help" element={<HelpIndex />} />
                     <Route path="/profile/settings" element={<Settings />} />
+                    <Route path="/checkout" element={<Checkout />} />
+                    <Route path="/order-confirmation" element={<OrderConfirmation />} />
+                    <Route path="/forgot-password" element={<ForgotPassword />} />
+                    <Route path="/reset-password/:token" element={<ResetPassword />} />
                 </Routes>
             </Layout>
         </Router>

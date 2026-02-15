@@ -287,6 +287,26 @@ const helpItems = [
                             </div>
 
                             <div className="hidden lg:flex items-center space-x-3">
+                                {/* Bouton Notifications */}
+                                <button
+                                    onClick={handleNotificationsClick}
+                                    className="p-2 text-gray-600 hover:text-gray-600 hover:bg-gray-50 rounded-full transition-colors relative group"
+                                    title="Notifications"
+                                >
+                                    <FaBell className="text-lg group-hover:scale-110 transition-transform" />
+                                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center group-hover:scale-125 transition-transform">
+                                        {unreadNotificationsCount}
+                                    </span>
+                                </button>
+                                {/* Bouton Panier */}
+                                <button
+                                    onClick={handleCartClick}
+                                    className="p-2 text-gray-600 hover:text-gray-600 hover:bg-gray-50 rounded-full transition-colors relative group"
+                                    title="Mon panier"
+                                >
+                                    <FaShoppingCart className="text-lg group-hover:scale-110 transition-transform" />
+                                </button>
+
                                 {/* Bouton Favoris */}
                                 <button
                                     onClick={handleWishlistClick}
@@ -294,33 +314,7 @@ const helpItems = [
                                     title="Mes favoris"
                                 >
                                     <FaHeart className="text-lg group-hover:scale-110 transition-transform" />
-                                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center group-hover:scale-125 transition-transform">
-                                        {favoriteVideos.length}
-                                    </span>
-                                </button>
-
-                                {/* Bouton Panier */}
-                                <button
-                                    onClick={handleCartClick}
-                                    className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors relative group"
-                                    title="Mon panier"
-                                >
-                                    <FaShoppingCart className="text-lg group-hover:scale-110 transition-transform" />
-                                    <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center group-hover:scale-125 transition-transform">
-                                        {cartItemsCount}
-                                    </span>
-                                </button>
-
-                                {/* Bouton Notifications */}
-                                <button
-                                    onClick={handleNotificationsClick}
-                                    className="p-2 text-gray-600 hover:text-yellow-600 hover:bg-yellow-50 rounded-full transition-colors relative group"
-                                    title="Notifications"
-                                >
-                                    <FaBell className="text-lg group-hover:scale-110 transition-transform" />
-                                    <span className="absolute -top-1 -right-1 bg-yellow-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center group-hover:scale-125 transition-transform">
-                                        {unreadNotificationsCount}
-                                    </span>
+                                    
                                 </button>
 
                                 {/* Bouton Se connecter / Mon compte */}

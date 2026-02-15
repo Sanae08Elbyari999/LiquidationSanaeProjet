@@ -1,6 +1,6 @@
 // src/pages/public/Login.jsx
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; // Ajoutez useNavigate ici
 import Button from '../../components/ui/Button';
 import {
     FaEnvelope,
@@ -15,6 +15,7 @@ import {
 } from 'react-icons/fa';
 
 const Login = () => {
+    const navigate = useNavigate(); // Ajoutez cette ligne
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -38,7 +39,33 @@ const Login = () => {
         // Simulation de connexion
         setTimeout(() => {
             setIsLoading(false);
-            alert('Fonctionnalité de connexion à implémenter');
+            
+            // Simuler une connexion réussie
+            // Dans une vraie application, vous vérifieriez les credentials avec votre backend
+            if (formData.email && formData.password) {
+                // Sauvegarder l'état de connexion (optionnel)
+                localStorage.setItem('isLoggedIn', 'true');
+                if (formData.rememberMe) {
+                    localStorage.setItem('rememberedEmail', formData.email);
+                }
+                
+                // Notification de succès
+                const toast = document.createElement('div');
+                toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-fade-in-out';
+                toast.textContent = 'Connexion réussie !';
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+                
+                // Redirection vers la page d'accueil
+                navigate('/');
+            } else {
+                // Notification d'erreur
+                const toast = document.createElement('div');
+                toast.className = 'fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-fade-in-out';
+                toast.textContent = 'Email ou mot de passe incorrect';
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            }
         }, 1500);
     };
 
@@ -218,6 +245,19 @@ const Login = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Styles pour les animations des notifications */}
+            <style jsx>{`
+                @keyframes fadeInOut {
+                    0% { opacity: 0; transform: translateY(-20px); }
+                    10% { opacity: 1; transform: translateY(0); }
+                    90% { opacity: 1; transform: translateY(0); }
+                    100% { opacity: 0; transform: translateY(-20px); }
+                }
+                .animate-fade-in-out {
+                    animation: fadeInOut 3s ease-in-out forwards;
+                }
+            `}</style>
         </div>
     );
 };
